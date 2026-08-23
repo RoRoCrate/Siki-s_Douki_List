@@ -69,33 +69,32 @@ function renderDetail(ego) {
                 </p>
 
             </header>
-            <section class="detail-section">
-                <h3>E.G.Oパッシブ</h3>
-                <p>
-                    ${ego["E.G.Oパッシブ"] || ""}
-                </p>
-            </section>
-            
-            <section class="detail-section">
-                <h3>発動条件</h3>
-                <p>
-                    ${ego["発動条件"] || ""}
-                </p>
-            </section>
-            
-            <section class="detail-section">
-                <h3>常時効果</h3>
-                <p>
-                    ${ego["常時効果"] || ""}
-                </p>
-            </section>
-            
-            <section class="detail-section">
-                <h3>効果</h3>
-                <p>
-                    ${ego["効果"] || ""}
-                </p>
-            </section>
+            <section class="passive-container">
+
+    <div class="passive-item">
+        <h3>E.G.Oパッシブ</h3>
+        <p>${ego["E.G.Oパッシブ"] || ""}</p>
+    </div>
+
+
+    <div class="passive-item">
+        <h3>発動条件</h3>
+        <p>${ego["発動条件"] || ""}</p>
+    </div>
+
+
+    <div class="passive-always">
+        <h3>常時効果</h3>
+        <p>${ego["常時効果"] || ""}</p>
+    </div>
+
+
+    <div class="passive-item">
+        <h3>効果</h3>
+        <p>${ego["効果"] || ""}</p>
+    </div>
+
+</section>
 
             <section class="two-column">
                 <div class="skill-box">
