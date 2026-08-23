@@ -2,23 +2,25 @@
 <html lang="ja">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
 
-<title>正岡死期 解析E.G.Oデータ置き場</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<link rel="stylesheet" href="css/style.css">
+    <title>正岡死期 解析E.G.Oデータ置き場</title>
+
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
 <header class="site-header">
-
     <div>
         <p class="eyebrow">DATABASE</p>
         <h1>正岡死期 解析E.G.Oデータ置き場</h1>
     </div>
-
 </header>
 
 
@@ -33,11 +35,7 @@
         >
 
         <select id="rank">
-
-            <option value="">
-                すべてのランク
-            </option>
-
+            <option value="">すべてのランク</option>
         </select>
 
     </section>
@@ -46,19 +44,14 @@
     <section>
 
         <div class="result-header">
-
             <h2>E.G.O一覧</h2>
-
             <span id="resultCount"></span>
-
         </div>
-
 
         <div
             id="egoList"
             class="ego-list"
         ></div>
-
 
         <p
             id="errorMessage"
@@ -70,8 +63,9 @@
 </main>
 
 
-<script src="js/tsv.js"></script>
-<script src="js/index.js"></script>
+<!-- ★ この順番にする -->
+<script src="./js/tsv.js"></script>
+<script src="./js/index.js"></script>
 
 </body>
 </html>
