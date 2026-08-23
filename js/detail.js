@@ -86,13 +86,8 @@ function renderDetail(ego) {
 
             <section class="two-column">
                 <div class="skill-box">
-                    <h3>覚醒効果</h3>
-                    <p>${escapeHTML(ego["覚醒効果"])}</p>
-                </div>
-
-                <div class="skill-box">
-                    <h3>浸食効果</h3>
-                    <p>${escapeHTML(ego["浸食効果"])}</p>
+                    <h3>固有</h3>
+                    <p>${escapeHTML(ego["固有"])}</p>
                 </div>
             </section>
         </article>
