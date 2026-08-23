@@ -84,12 +84,12 @@ function renderDetail(ego) {
                 </div>
             </section>
 
-            <section class="two-column">
-                <div class="skill-box">
-                    <h3>固有</h3>
-                    <p>${escapeHTML(ego["固有"])}</p>
-                </div>
+            <section class="detail-section">
+                <h3>固有</h3>
+                <p>${escapeHTML(ego["固有"])}</p>
             </section>
         </article>
+    `;
+}
     `;
 }
