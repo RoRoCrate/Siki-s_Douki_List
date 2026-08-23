@@ -140,7 +140,7 @@ function renderDetail(ego) {
 
             <!-- 固有 -->
 
-            <section class="detail-section">
+           <section class="unique-section">
 
                 <h3>固有</h3>
 
