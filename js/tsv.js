@@ -25,7 +25,7 @@ async function loadTSV(path = "data/ego.tsv") {
         headers.forEach((header, index) => {
             row[header] = (values[index] ?? "")
     .trim()
-    .replace(/\\n/g, "\n");
+    .replace(/\\n/g, "<br>");
         });
 
         return row;
