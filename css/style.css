@@ -404,12 +404,11 @@ select:focus {
 /* =========================
    通常の詳細項目
 ========================= */
-
-.detail-section {
-    padding: 23px 30px;
-
-    border-bottom: 1px solid var(--line-soft);
-
+.detail-section p,
+.skill-box p {
+    margin: 0;
+    color: var(--text);
+    line-height: 1.85;
     text-align: left;
 }
 
