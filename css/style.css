@@ -408,8 +408,8 @@ select:focus {
     line-height: 1.85;
 
     /*
-     * pre-wrapは使用しない
-     * HTML内のインデントによる空白を表示しない
+     * HTML内のインデントを
+     * 余計な空白として表示しない
      */
     white-space: normal;
 
@@ -441,61 +441,6 @@ select:focus {
 
 
 /* =========================
-   通常の詳細項目
-========================= */
-
-.detail-section {
-    padding: 23px 30px;
-
-    border-bottom: 1px solid var(--line-soft);
-
-    text-align: left;
-}
-
-.detail-section:last-child {
-    border-bottom: 0;
-}
-
-
-/* =========================
-   詳細見出し
-========================= */
-
-.detail-section h3,
-.skill-box h3 {
-    margin: 0 0 4px;
-
-    color: var(--text-soft);
-
-    font-size: 14px;
-    font-weight: 600;
-
-    text-align: left;
-}
-
-
-/* =========================
-   詳細本文
-========================= */
-
-.detail-section p,
-.skill-box p {
-    margin: 0;
-
-    color: var(--text);
-
-    line-height: 1.85;
-
-    /*
-     * ここもpre-wrapを使わない
-     */
-    white-space: normal;
-
-    text-align: left;
-}
-
-
-/* =========================
    覚醒・浸食スキル
 ========================= */
 
@@ -517,6 +462,71 @@ select:focus {
 
 .skill-box + .skill-box {
     border-left: 1px solid var(--line-soft);
+}
+
+
+/* スキル見出し */
+
+.skill-box h3 {
+    margin: 0 0 4px;
+
+    color: var(--text-soft);
+
+    font-size: 14px;
+    font-weight: 600;
+
+    text-align: left;
+}
+
+
+/* スキル本文 */
+
+.skill-box p {
+    margin: 0;
+
+    color: var(--text);
+
+    line-height: 1.85;
+
+    white-space: normal;
+
+    text-align: left;
+}
+
+
+/* =========================
+   固有
+========================= */
+
+.unique-section {
+    padding: 23px 30px;
+
+    border-top: 1px solid var(--line-soft);
+
+    text-align: left;
+}
+
+.unique-section h3 {
+    margin: 0 0 4px;
+
+    color: var(--text-soft);
+
+    font-size: 14px;
+    font-weight: 600;
+
+    text-align: left;
+}
+
+.unique-section p {
+    margin: 0;
+
+    color: var(--text);
+
+    line-height: 1.85;
+
+    white-space: normal;
+
+    text-align: left;
 }
 
 
@@ -618,6 +628,13 @@ select:focus {
 
     .passive-always {
         padding: 16px 17px;
+    }
+
+
+    /* 固有 */
+
+    .unique-section {
+        padding: 19px;
     }
 
 
