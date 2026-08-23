@@ -1,20 +1,12 @@
 // ========================================
-// TSV読み込み・共通処理
+// TSV読み込み
 // ========================================
 
-async function loadTSV(path = "data/ego.tsv") {
+async function loadTSV(path = "./data/ego.tsv") {
 
-    const response = await fetch(
-        path,
-        {
-            cache: "no-store"
-        }
-    );
-
-
-    // ========================================
-    // TSV読み込み失敗
-    // ========================================
+    const response = await fetch(path, {
+        cache: "no-store"
+    });
 
     if (!response.ok) {
 
@@ -24,130 +16,57 @@ async function loadTSV(path = "data/ego.tsv") {
 
     }
 
-
-    // ========================================
-    // TSV本文取得
-    // ========================================
-
-    const text =
-        await response.text();
+    const text = await response.text();
 
 
-    // ========================================
-    // 改行・BOMを正規化
-    // ========================================
+    // BOM・改行コードを整理
 
-    const normalized =
-        text
-            // UTF-8 BOMを削除
-            .replace(/^\uFEFF/, "")
-
-            // Windows改行
-            .replace(/\r\n/g, "\n")
-
-            // Mac系改行
-            .replace(/\r/g, "\n");
+    const normalized = text
+        .replace(/^\uFEFF/, "")
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n");
 
 
-    // ========================================
-    // 行ごとに分割
-    // ========================================
+    const lines = normalized
+        .split("\n")
+        .filter(line => line.trim() !== "");
 
-    const lines =
-        normalized
-            .split("\n")
-            .filter(
-                line => line.trim() !== ""
-            );
-
-
-    // データがない場合
 
     if (lines.length < 2) {
         return [];
     }
 
 
-    // ========================================
-    // ヘッダー取得
-    // ========================================
+    // 1行目をヘッダーとして取得
 
-    const headers =
-        lines[0]
-            .split("\t")
-            .map(
-                value => value.trim()
-            );
+    const headers = lines[0]
+        .split("\t")
+        .map(value => value.trim());
 
 
-    // ========================================
-    // 各データをオブジェクト化
-    // ========================================
+    // データをオブジェクト化
 
-    return lines
-        .slice(1)
-        .map(line => {
+    return lines.slice(1).map(line => {
 
-            const values =
-                line.split("\t");
+        const values = line.split("\t");
+
+        const row = {};
 
 
-            const row = {};
+        headers.forEach((header, index) => {
 
-
-            headers.forEach(
-                (header, index) => {
-
-                    let value =
-                        values[index] ?? "";
-
-
-                    // 前後の空白を削除
-
-                    value =
-                        value.trim();
-
-
-                    /*
-                     * TSV内の
-                     *
-                     * \n
-                     *
-                     * を
-                     *
-                     * <br>
-                     *
-                     * に変換
-                     */
-
-                    value =
-                        value.replace(
-                            /\\n/g,
-                            "<br>"
-                        );
-
-
-                    /*
-                     * <br>
-                     * <BR>
-                     * <br/>
-                     * <br />
-                     *
-                     * などをそのまま使用可能
-                     */
-
-                    row[header] =
-                        value;
-
-                }
-            );
-
-
-            return row;
+            row[header] =
+                (values[index] ?? "").trim();
 
         });
 
+
+        return row;
+
+    });
+
 }
+
 
 
 // ========================================
@@ -158,32 +77,14 @@ function escapeHTML(value) {
 
     return String(value ?? "")
 
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
 }
+
 
 
 // ========================================
@@ -193,22 +94,92 @@ function escapeHTML(value) {
 function showError(message) {
 
     const element =
-        document.getElementById(
-            "errorMessage"
-        );
+        document.getElementById("errorMessage");
 
 
     if (!element) {
+
+        console.error(message);
+
         return;
+
     }
 
 
-    element.textContent =
-        message;
+    element.textContent = message;
+
+    element.classList.remove("hidden");
+
+}
 
 
-    element.classList.remove(
-        "hidden"
-    );
+
+// ========================================
+// ランクCSS
+// ========================================
+
+function getRankClass(rank) {
+
+    const key =
+        String(rank || "")
+            .trim()
+            .toUpperCase();
+
+
+    switch (key) {
+
+        case "ZAYIN":
+            return "rank-zayin";
+
+        case "TETH":
+            return "rank-teth";
+
+        case "HE":
+            return "rank-he";
+
+        case "WAW":
+            return "rank-waw";
+
+        case "ALEPH":
+            return "rank-aleph";
+
+        default:
+            return "";
+
+    }
+
+}
+
+
+
+// ========================================
+// TSV文章の整形
+// ========================================
+
+function cleanText(value) {
+
+    return String(value ?? "")
+
+        .replace(
+            /^[\s\u00a0]+/,
+            ""
+        )
+
+        .replace(
+            /[\s\u00a0]+$/,
+            ""
+        )
+
+        .replace(
+            /<br\s*\/?>[\s\u00a0]+/gi,
+            "<br>"
+        )
+
+        .replace(
+            /[\s\u00a0]+<br\s*\/?>/gi,
+            "<br>"
+        )
+
+        .trim();
 
 }
