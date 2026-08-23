@@ -24,6 +24,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
+function cleanText(value) {
+    return String(value ?? "")
+        // 先頭の空白・改行・<br>を削除
+        .replace(/^(?:\s|<br>)+/gi, "")
+        // 末尾の空白・改行・<br>を削除
+        .replace(/(?:\s|<br>)+$/gi, "")
+        .trim();
+}
 
 function getRankClass(rank) {
     const key = String(rank || "").trim().toUpperCase();
@@ -100,13 +108,13 @@ function renderDetail(ego) {
                 <div class="skill-box">
                     <h3>覚醒スキル</h3>
                     <p>
-                        ${ego["覚醒スキル"] || ""}
+                        ${cleanText(ego["覚醒スキル"])}
                     </p>
                 </div>
                 <div class="skill-box">
                     <h3>浸食スキル</h3>
                     <p>
-                        ${ego["浸食スキル"] || ""}
+                        ${cleanText(ego["浸食スキル"])}
                     </p>
                 </div>
             </section>
@@ -114,7 +122,7 @@ function renderDetail(ego) {
             <section class="detail-section">
                 <h3>固有</h3>
                 <p>
-                    ${ego["固有"] || ""}
+                    ${cleanText(ego["固有"])}
                 </p>
             </section>
         </article>
