@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E.G.O DATABASE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site-header">
+    <div>
+        <p class="eyebrow">DATABASE</p>
+        <h1>E.G.O DATABASE</h1>
+    </div>
+</header>
+
+<main class="container">
+    <section class="search-panel">
+        <input id="keyword" type="search" placeholder="名称・ランク・効果などを検索">
+        <select id="rank">
+            <option value="">すべてのランク</option>
+        </select>
+    </section>
+
+    <section>
+        <div class="result-header">
+            <h2>E.G.O一覧</h2>
+            <span id="resultCount"></span>
+        </div>
+        <div id="egoList" class="ego-list"></div>
+        <p id="errorMessage" class="message error hidden"></p>
+    </section>
+</main>
+
+<script src="js/tsv.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>
