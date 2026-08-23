@@ -59,7 +59,7 @@ function renderDetail(ego) {
 
             <section class="detail-section">
                 <h3>E.G.Oパッシブ</h3>
-                <p>${escapeHTML(ego["E.G.Oパッシブ"])}</p>
+                <p>${ego["E.G.Oパッシブ"]}</p>
             </section>
 
             <section class="detail-section">
@@ -69,31 +69,31 @@ function renderDetail(ego) {
 
             <section class="detail-section">
                 <h3>常時効果</h3>
-                <p>${escapeHTML(ego["常時効果"])}</p>
+                <p>${ego["常時効果"]}</p>
             </section>
 
             <section class="detail-section">
                 <h3>効果</h3>
-                <p>${escapeHTML(ego["効果"])}</p>
+                <p>${ego["効果"]}</p>
             </section>
 
             <section class="two-column">
 
                 <div class="skill-box">
                     <h3>覚醒スキル</h3>
-                    <p>${escapeHTML(ego["覚醒スキル"])}</p>
+                    <p>${ego["覚醒スキル"]}</p>
                 </div>
 
                 <div class="skill-box">
                     <h3>浸食スキル</h3>
-                    <p>${escapeHTML(ego["浸食スキル"])}</p>
+                    <p>${ego["浸食スキル"]}</p>
                 </div>
 
             </section>
 
             <section class="detail-section">
                 <h3>固有</h3>
-                <p>${escapeHTML(ego["固有"])}</p>
+                <p>${ego["固有"]}</p>
             </section>
 
         </article>
