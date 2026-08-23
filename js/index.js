@@ -1,94 +1,386 @@
-let egoData = [];
-
 document.addEventListener("DOMContentLoaded", async () => {
+
+    const keywordInput =
+        document.getElementById("keyword");
+
+    const rankSelect =
+        document.getElementById("rank");
+
+    const egoList =
+        document.getElementById("egoList");
+
+    const resultCount =
+        document.getElementById("resultCount");
+
+
+    let egoData = [];
+
+
+    // =========================
+    // TSV読み込み
+    // =========================
+
     try {
+
         egoData = await loadTSV();
-        setupRankFilter();
-        setupSearch();
-        renderList();
+
     } catch (error) {
+
         console.error(error);
-        showError("E.G.Oデータを読み込めませんでした。");
+
+        showError(
+            "E.G.Oデータを読み込めませんでした。"
+        );
+
+        return;
+
     }
+
+
+    // =========================
+    // ランク一覧を作成
+    // =========================
+
+    createRankOptions(
+        egoData,
+        rankSelect
+    );
+
+
+    // =========================
+    // 初期表示
+    // =========================
+
+    renderList(
+        egoData,
+        egoList,
+        resultCount
+    );
+
+
+    // =========================
+    // 検索
+    // =========================
+
+    keywordInput.addEventListener(
+        "input",
+        updateList
+    );
+
+
+    rankSelect.addEventListener(
+        "change",
+        updateList
+    );
+
+
+    function updateList() {
+
+        const keyword =
+            keywordInput.value
+                .trim()
+                .toLowerCase();
+
+
+        const selectedRank =
+            rankSelect.value
+                .trim()
+                .toUpperCase();
+
+
+        const filtered =
+            egoData.filter(ego => {
+
+
+                // -------------------------
+                // ランク検索
+                // -------------------------
+
+                const rank =
+                    String(
+                        ego["ランク"] || ""
+                    )
+                    .trim()
+                    .toUpperCase();
+
+
+                if (
+                    selectedRank &&
+                    rank !== selectedRank
+                ) {
+
+                    return false;
+
+                }
+
+
+                // -------------------------
+                // キーワード検索
+                // -------------------------
+
+                if (!keyword) {
+                    return true;
+                }
+
+
+                /*
+                 * TSVの全項目を検索対象にする
+                 */
+
+                return Object.values(ego)
+                    .some(value =>
+
+                        String(value ?? "")
+                            .toLowerCase()
+                            .includes(keyword)
+
+                    );
+
+            });
+
+
+        renderList(
+            filtered,
+            egoList,
+            resultCount
+        );
+
+    }
+
 });
 
-function getRankClass(rank) {
-    const key = String(rank || "").trim().toUpperCase();
 
-    switch (key) {
-        case "ZAYIN": return "rank-zayin";
-        case "TETH": return "rank-teth";
-        case "HE": return "rank-he";
-        case "WAW": return "rank-waw";
-        case "ALEPH": return "rank-aleph";
-        default: return "";
-    }
-}
+// =========================
+// ランク選択肢
+// =========================
 
-function setupRankFilter() {
-    const select = document.getElementById("rank");
-    const ranks = [...new Set(egoData.map(ego => ego["ランク"]).filter(Boolean))];
+function createRankOptions(
+    data,
+    select
+) {
 
-    const order = ["ZAYIN", "TETH", "HE", "WAW", "ALEPH"];
+    const ranks = [
+        "ZAYIN",
+        "TETH",
+        "HE",
+        "WAW",
+        "ALEPH"
+    ];
 
-    ranks.sort((a, b) => {
-        const ai = order.indexOf(a.toUpperCase());
-        const bi = order.indexOf(b.toUpperCase());
 
-        if (ai === -1 && bi === -1) return a.localeCompare(b);
-        if (ai === -1) return 1;
-        if (bi === -1) return -1;
-        return ai - bi;
-    });
+    ranks.forEach(rank => {
 
-    for (const rank of ranks) {
-        const option = document.createElement("option");
+        const option =
+            document.createElement("option");
+
+
         option.value = rank;
         option.textContent = rank;
+
+
         select.appendChild(option);
-    }
-}
 
-function setupSearch() {
-    document.getElementById("keyword").addEventListener("input", renderList);
-    document.getElementById("rank").addEventListener("change", renderList);
-}
-
-function renderList() {
-    const keyword = document.getElementById("keyword").value.trim().toLowerCase();
-    const rank = document.getElementById("rank").value;
-    const list = document.getElementById("egoList");
-
-    const filtered = egoData.filter(ego => {
-        const matchesRank = !rank || ego["ランク"] === rank;
-
-        const searchable = Object.values(ego)
-            .join(" ")
-            .toLowerCase();
-
-        const matchesKeyword = !keyword || searchable.includes(keyword);
-
-        return matchesRank && matchesKeyword;
     });
 
-    document.getElementById("resultCount").textContent = `${filtered.length}件`;
+}
 
-    if (filtered.length === 0) {
-        list.innerHTML = `<div class="message">該当するE.G.Oはありません。</div>`;
+
+// =========================
+// ランクCSS
+// =========================
+
+function getRankClass(rank) {
+
+    const key =
+        String(rank || "")
+            .trim()
+            .toUpperCase();
+
+
+    switch (key) {
+
+        case "ZAYIN":
+            return "rank-zayin";
+
+        case "TETH":
+            return "rank-teth";
+
+        case "HE":
+            return "rank-he";
+
+        case "WAW":
+            return "rank-waw";
+
+        case "ALEPH":
+            return "rank-aleph";
+
+        default:
+            return "";
+
+    }
+
+}
+
+
+// =========================
+// E.G.O一覧表示
+// =========================
+
+function renderList(
+    data,
+    list,
+    count
+) {
+
+    count.textContent =
+        `${data.length}件`;
+
+
+    if (data.length === 0) {
+
+        list.innerHTML = `
+
+            <p class="message">
+                該当するE.G.Oがありません。
+            </p>
+
+        `;
+
+        return;
+
+    }
+
+
+    list.innerHTML =
+        data.map(ego => {
+
+
+            const id =
+                encodeURIComponent(
+                    String(
+                        ego["ID"] || ""
+                    ).trim()
+                );
+
+
+            const rank =
+                String(
+                    ego["ランク"] || ""
+                ).trim();
+
+
+            const name =
+                String(
+                    ego["名称"] || ""
+                ).trim();
+
+
+            const resource =
+                String(
+                    ego["必要資源"] || ""
+                ).trim();
+
+
+            const rankClass =
+                getRankClass(rank);
+
+
+            return `
+
+                <a
+                    class="ego-card"
+                    href="ego/${id}/"
+                >
+
+                    <div class="ego-card-top">
+
+                        <span
+                            class="rank ${rankClass}"
+                        >
+                            ${escapeHTML(rank)}
+                        </span>
+
+
+                        <h3 class="ego-name">
+                            ${escapeHTML(name)}
+                        </h3>
+
+                    </div>
+
+
+                    <p class="resource">
+
+                        必要資源：
+                        ${escapeHTML(resource)}
+
+                    </p>
+
+                </a>
+
+            `;
+
+        }).join("");
+
+}
+
+
+// =========================
+// HTMLエスケープ
+// =========================
+
+function escapeHTML(value) {
+
+    return String(value ?? "")
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+// =========================
+// エラー表示
+// =========================
+
+function showError(message) {
+
+    const element =
+        document.getElementById(
+            "errorMessage"
+        );
+
+
+    if (!element) {
         return;
     }
 
-    list.innerHTML = filtered.map(ego => {
-        const rankClass = getRankClass(ego["ランク"]);
 
-        return `
-            <a class="ego-card" href="detail.html?id=${encodeURIComponent(ego["ID"])}">
-                <div class="ego-card-top">
-                    <span class="rank ${rankClass}">${escapeHTML(ego["ランク"])}</span>
-                    <p class="ego-name">${escapeHTML(ego["名称"])}</p>
-                </div>
-                <p class="resource">必要資源：${escapeHTML(ego["必要資源"])}</p>
-            </a>
-        `;
-    }).join("");
+    element.textContent = message;
+
+    element.classList.remove(
+        "hidden"
+    );
+
 }
