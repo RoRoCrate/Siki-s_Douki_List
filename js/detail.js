@@ -44,9 +44,14 @@ function renderDetail(ego) {
 
     detail.innerHTML = `
         <article class="detail-card">
+
             <header class="detail-title">
-                <span class="rank ${rankClass}">${escapeHTML(ego["ランク"])}</span>
+                <span class="rank ${rankClass}">
+                    ${escapeHTML(ego["ランク"])}
+                </span>
+
                 <h2>${escapeHTML(ego["名称"])}</h2>
+
                 <p class="detail-resource">
                     必要資源：${escapeHTML(ego["必要資源"])}
                 </p>
@@ -73,6 +78,7 @@ function renderDetail(ego) {
             </section>
 
             <section class="two-column">
+
                 <div class="skill-box">
                     <h3>覚醒スキル</h3>
                     <p>${escapeHTML(ego["覚醒スキル"])}</p>
@@ -82,14 +88,14 @@ function renderDetail(ego) {
                     <h3>浸食スキル</h3>
                     <p>${escapeHTML(ego["浸食スキル"])}</p>
                 </div>
+
             </section>
 
             <section class="detail-section">
                 <h3>固有</h3>
                 <p>${escapeHTML(ego["固有"])}</p>
             </section>
+
         </article>
-    `;
-}
     `;
 }
