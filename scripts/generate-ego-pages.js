@@ -1,68 +1,170 @@
 const fs = require("fs");
 const path = require("path");
 
-const TSV_PATH = path.join(__dirname, "..", "data", "ego.tsv");
-const OUTPUT_DIR = path.join(__dirname, "..", "ego");
+
+// ========================================
+// ãƒ‘ã‚¹
+// ========================================
+
+const TSV_PATH =
+    path.join(
+        __dirname,
+        "..",
+        "data",
+        "ego.tsv"
+    );
 
 
-// =========================
-// TSV“Ç‚İ‚İ
-// =========================
-
-function loadTSV() {
-    const text = fs.readFileSync(TSV_PATH, "utf8")
-        .replace(/^\uFEFF/, "")
-        .replace(/\r\n/g, "\n")
-        .replace(/\r/g, "\n");
-
-    const lines = text
-        .split("\n")
-        .filter(line => line.trim() !== "");
-
-    if (lines.length < 2) {
-        return [];
-    }
-
-    const headers = lines[0]
-        .split("\t")
-        .map(value => value.trim());
-
-    return lines.slice(1).map(line => {
-        const values = line.split("\t");
-        const row = {};
-
-        headers.forEach((header, index) => {
-            row[header] = (values[index] ?? "").trim();
-        });
-
-        return row;
-    });
-}
+const OUTPUT_DIR =
+    path.join(
+        __dirname,
+        "..",
+        "ego"
+    );
 
 
-// =========================
-// HTMLƒGƒXƒP[ƒv
-// =========================
+// ========================================
+// HTMLã‚¨ã‚¹ã‚±ãƒ¼ãƒ—
+// ========================================
 
 function escapeHTML(value) {
+
     return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
 }
 
 
-// =========================
-// ƒ‰ƒ“ƒN
-// =========================
+// ========================================
+// TSVèª­ã¿è¾¼ã¿
+// ========================================
+
+function loadTSV() {
+
+    const text =
+        fs.readFileSync(
+            TSV_PATH,
+            "utf8"
+        )
+
+        .replace(
+            /^\uFEFF/,
+            ""
+        )
+
+        .replace(
+            /\r\n/g,
+            "\n"
+        )
+
+        .replace(
+            /\r/g,
+            "\n"
+        );
+
+
+    const lines =
+        text
+            .split("\n")
+            .filter(
+                line =>
+                    line.trim() !== ""
+            );
+
+
+    if (lines.length < 2) {
+
+        return [];
+
+    }
+
+
+    const headers =
+        lines[0]
+            .split("\t")
+            .map(
+                value =>
+                    value.trim()
+            );
+
+
+    console.log(
+        "TSV headers:",
+        headers
+    );
+
+
+    return lines
+        .slice(1)
+        .map(
+            line => {
+
+                const values =
+                    line.split("\t");
+
+
+                const row = {};
+
+
+                headers.forEach(
+                    (
+                        header,
+                        index
+                    ) => {
+
+                        row[header] =
+                            (
+                                values[index] ??
+                                ""
+                            ).trim();
+
+                    }
+                );
+
+
+                return row;
+
+            }
+        );
+
+}
+
+
+// ========================================
+// ãƒ©ãƒ³ã‚¯CSS
+// ========================================
 
 function getRankClass(rank) {
 
-    const key = String(rank || "")
-        .trim()
-        .toUpperCase();
+    const key =
+        String(rank || "")
+            .trim()
+            .toUpperCase();
+
 
     switch (key) {
 
@@ -83,26 +185,77 @@ function getRankClass(rank) {
 
         default:
             return "";
+
     }
+
 }
 
 
-// =========================
-// E.G.Oƒy[ƒW¶¬
-// =========================
+// ========================================
+// E.G.Oãƒšãƒ¼ã‚¸ç”Ÿæˆ
+// ========================================
 
 function generatePage(ego) {
 
-    const id = escapeHTML(ego["ID"]);
-    const rank = escapeHTML(ego["ƒ‰ƒ“ƒN"]);
-    const name = escapeHTML(ego["–¼Ì"]);
+    const id =
+        String(
+            ego["ID"] || ""
+        ).trim();
 
-    const rankClass = getRankClass(ego["ƒ‰ƒ“ƒN"]);
 
-    const title = `[${ego["ƒ‰ƒ“ƒN"]}] ${ego["–¼Ì"]}`;
+    const rank =
+        String(
+            ego["ãƒ©ãƒ³ã‚¯"] || ""
+        ).trim();
 
-    const description =
-        `E.G.O DATABASE | ${ego["ƒ‰ƒ“ƒN"]} | ${ego["–¼Ì"]}`;
+
+    const name =
+        String(
+            ego["åç§°"] || ""
+        ).trim();
+
+
+    if (!id) {
+
+        console.warn(
+            "IDãŒãªã„è¡Œã‚’ã‚¹ã‚­ãƒƒãƒ—ã—ã¾ã—ãŸã€‚"
+        );
+
+        return null;
+
+    }
+
+
+    if (!rank) {
+
+        console.warn(
+            `ID ${id}: ãƒ©ãƒ³ã‚¯ãŒã‚ã‚Šã¾ã›ã‚“ã€‚`
+        );
+
+    }
+
+
+    if (!name) {
+
+        console.warn(
+            `ID ${id}: åç§°ãŒã‚ã‚Šã¾ã›ã‚“ã€‚`
+        );
+
+    }
+
+
+    const rankClass =
+        getRankClass(rank);
+
+
+    // Discordã«è¡¨ç¤ºã™ã‚‹ã‚¿ã‚¤ãƒˆãƒ«
+
+    const ogpTitle =
+        `[${rank}] ${name}`;
+
+
+    const ogpDescription =
+        `E.G.O DATABASE | ${rank} | ${name}`;
 
 
     return `<!DOCTYPE html>
@@ -112,50 +265,74 @@ function generatePage(ego) {
 
 <meta charset="UTF-8">
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-<title>${escapeHTML(title)} | E.G.O DATABASE</title>
+
+<title>
+${escapeHTML(ogpTitle)} | E.G.O DATABASE
+</title>
 
 
 <!-- =========================
      Discord / OGP
 ========================= -->
 
-<meta property="og:type"
-      content="website">
-
-<meta property="og:title"
-      content="${escapeHTML(title)}">
-
-<meta property="og:description"
-      content="${escapeHTML(description)}">
-
-<meta property="og:site_name"
-      content="E.G.O DATABASE">
+<meta
+    property="og:type"
+    content="website"
+>
 
 
-<!-- Twitter“™ -->
-
-<meta name="twitter:card"
-      content="summary">
-
-<meta name="twitter:title"
-      content="${escapeHTML(title)}">
-
-<meta name="twitter:description"
-      content="${escapeHTML(description)}">
+<meta
+    property="og:title"
+    content="${escapeHTML(ogpTitle)}"
+>
 
 
-<!-- ‹¤’ÊCSS -->
+<meta
+    property="og:description"
+    content="${escapeHTML(ogpDescription)}"
+>
 
-<link rel="stylesheet"
-      href="../../css/style.css">
+
+<meta
+    property="og:site_name"
+    content="E.G.O DATABASE"
+>
+
+
+<meta
+    name="twitter:card"
+    content="summary"
+>
+
+
+<meta
+    name="twitter:title"
+    content="${escapeHTML(ogpTitle)}"
+>
+
+
+<meta
+    name="twitter:description"
+    content="${escapeHTML(ogpDescription)}"
+>
+
+
+<link
+    rel="stylesheet"
+    href="../../css/style.css"
+>
+
 
 </head>
 
 
 <body>
+
 
 <header class="site-header">
 
@@ -176,11 +353,12 @@ function generatePage(ego) {
 
 <main class="container">
 
+
     <a
         class="back-link"
         href="../../index.html"
     >
-        © E.G.Oˆê——‚Ö–ß‚é
+        â† E.G.Oä¸€è¦§ã¸æˆ»ã‚‹
     </a>
 
 
@@ -192,87 +370,135 @@ function generatePage(ego) {
 
     <div
         id="detail"
-        data-ego-id="${id}"
+        data-ego-id="${escapeHTML(id)}"
     ></div>
+
 
 </main>
 
 
-<script src="../../js/common.js"></script>
+<script src="../../js/tsv.js"></script>
 
 <script src="../../js/detail.js"></script>
+
 
 </body>
 
 </html>`;
-}
-
-
-// =========================
-// ŒÃ‚¢ƒy[ƒW‚ğíœ
-// =========================
-
-if (fs.existsSync(OUTPUT_DIR)) {
-
-    fs.rmSync(OUTPUT_DIR, {
-        recursive: true,
-        force: true
-    });
 
 }
 
-fs.mkdirSync(OUTPUT_DIR, {
-    recursive: true
-});
+
+// ========================================
+// æ—¢å­˜ç”Ÿæˆãƒšãƒ¼ã‚¸å‰Šé™¤
+// ========================================
+
+if (
+    fs.existsSync(
+        OUTPUT_DIR
+    )
+) {
+
+    fs.rmSync(
+        OUTPUT_DIR,
+        {
+            recursive: true,
+            force: true
+        }
+    );
+
+}
 
 
-// =========================
-// TSV ¨ HTML
-// =========================
+fs.mkdirSync(
+    OUTPUT_DIR,
+    {
+        recursive: true
+    }
+);
 
-const egos = loadTSV();
 
-console.log(`E.G.O ${egos.length}Œ‚ğ¶¬‚µ‚Ü‚·B`);
+// ========================================
+// TSVèª­ã¿è¾¼ã¿
+// ========================================
+
+const egos =
+    loadTSV();
 
 
-for (const ego of egos) {
+console.log(
+    `E.G.O ${egos.length}ä»¶ã‚’ç”Ÿæˆã—ã¾ã™ã€‚`
+);
 
-    const id = String(ego["ID"] || "").trim();
+
+// ========================================
+// ãƒšãƒ¼ã‚¸ç”Ÿæˆ
+// ========================================
+
+for (
+    const ego of egos
+) {
+
+    const id =
+        String(
+            ego["ID"] || ""
+        ).trim();
+
 
     if (!id) {
-        console.warn("ID‚ª‚È‚¢s‚ğƒXƒLƒbƒv‚µ‚Ü‚µ‚½B");
+
         continue;
+
     }
 
 
-    const outputDir = path.join(
-        OUTPUT_DIR,
-        id
-    );
+    const outputDir =
+        path.join(
+            OUTPUT_DIR,
+            id
+        );
 
 
-    fs.mkdirSync(outputDir, {
-        recursive: true
-    });
-
-
-    const outputPath = path.join(
+    fs.mkdirSync(
         outputDir,
-        "index.html"
+        {
+            recursive: true
+        }
     );
+
+
+    const outputPath =
+        path.join(
+            outputDir,
+            "index.html"
+        );
+
+
+    const html =
+        generatePage(ego);
+
+
+    if (!html) {
+
+        continue;
+
+    }
 
 
     fs.writeFileSync(
         outputPath,
-        generatePage(ego),
+        html,
         "utf8"
     );
 
 
     console.log(
-        `¶¬: ego/${id}/index.html`
+        `ç”Ÿæˆ: ego/${id}/index.html`
     );
+
 }
 
 
-console.log("¶¬Š®—¹I");
+console.log(
+    "E.G.Oãƒšãƒ¼ã‚¸ç”Ÿæˆå®Œäº†ï¼"
+);
