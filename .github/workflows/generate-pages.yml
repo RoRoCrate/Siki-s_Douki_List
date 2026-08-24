@@ -18,9 +18,17 @@ jobs:
 
     steps:
 
+      # =========================
+      # リポジトリ取得
+      # =========================
+
       - name: Checkout
         uses: actions/checkout@v4
 
+
+      # =========================
+      # Node.js
+      # =========================
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -28,9 +36,36 @@ jobs:
           node-version: 22
 
 
+      # =========================
+      # E.G.Oページ生成
+      # =========================
+
       - name: Generate E.G.O pages
         run: npm run generate
 
+
+      # =========================
+      # 生成結果確認
+      # =========================
+
+      - name: Check generated pages
+        run: |
+          echo "=== Generated E.G.O pages ==="
+          find ego -name index.html -print
+
+          echo ""
+          echo "=== Example generated page ==="
+
+          if [ -f "ego/ego001/index.html" ]; then
+            sed -n '1,80p' ego/ego001/index.html
+          else
+            echo "ego/ego001/index.html does not exist."
+          fi
+
+
+      # =========================
+      # Gitへ反映
+      # =========================
 
       - name: Commit generated pages
         run: |
