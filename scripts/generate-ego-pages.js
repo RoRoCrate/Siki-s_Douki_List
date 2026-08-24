@@ -248,14 +248,17 @@ function generatePage(ego) {
         getRankClass(rank);
 
 
-    // Discordに表示するタイトル
-
+    // Discord / OGP表示用パラメータ
     const ogpTitle =
         `[${rank}] ${name}`;
 
 
     const ogpDescription =
-        `E.G.O DATABASE | ${rank} | ${name}`;
+        `E.G.O DATABASE | ランク: ${rank} | 名称: ${name}`;
+
+
+    const ogpUrl =
+        `https://rorocrate.github.io/Siki-s_Douki_List/ego/${id}/`;
 
 
     return `<!DOCTYPE html>
@@ -277,7 +280,7 @@ ${escapeHTML(ogpTitle)} | E.G.O DATABASE
 
 
 <!-- =========================
-     Discord / OGP
+     Discord / OGP (SNS共有用)
 ========================= -->
 
 <meta
@@ -295,6 +298,12 @@ ${escapeHTML(ogpTitle)} | E.G.O DATABASE
 <meta
     property="og:description"
     content="${escapeHTML(ogpDescription)}"
+>
+
+
+<meta
+    property="og:url"
+    content="${escapeHTML(ogpUrl)}"
 >
 
 
