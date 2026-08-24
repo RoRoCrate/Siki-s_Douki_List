@@ -52,11 +52,10 @@ document.addEventListener(
         }
 
 
-        try {
+       try {
 
             const egoData =
-                await loadTSV();
-
+                await loadTSV("../../data/ego.tsv");
 
             const ego =
                 egoData.find(
