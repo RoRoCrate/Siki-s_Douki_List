@@ -2,31 +2,46 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<meta charset="UTF-8">
 
-    <title>解析E.G.Oデータ置き場E</title>
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-    <link rel="stylesheet" href="./css/style.css">
+<title>解析E.G.Oデータ置き場</title>
+
+<link
+    rel="stylesheet"
+    href="css/style.css"
+>
+
 </head>
 
+
 <body>
+
 
 <header class="site-header">
 
     <div>
-        <p class="eyebrow">DATABASE</p>
-        <h1>解析E.G.Oデータ置き場</h1>
+
+        <p class="eyebrow">
+            DATABASE
+        </p>
+
+        <h1>
+            解析E.G.Oデータ置き場
+        </h1>
+
     </div>
 
 </header>
 
 
 <main class="container">
+
 
     <section class="search-panel">
 
@@ -36,8 +51,13 @@
             placeholder="名称・ランク・効果などを検索"
         >
 
+
         <select id="rank">
-            <option value="">すべてのランク</option>
+
+            <option value="">
+                すべてのランク
+            </option>
+
         </select>
 
     </section>
@@ -45,9 +65,12 @@
 
     <section>
 
+
         <div class="result-header">
 
-            <h2>E.G.O一覧</h2>
+            <h2>
+                E.G.O一覧
+            </h2>
 
             <span id="resultCount"></span>
 
@@ -65,14 +88,16 @@
             class="message error hidden"
         ></p>
 
+
     </section>
+
 
 </main>
 
 
-<!-- ★ この順番を絶対に変えない -->
-<script src="./js/tsv.js"></script>
-<script src="./js/index.js"></script>
+<script src="js/tsv.js"></script>
+
+<script src="js/index.js"></script>
 
 
 </body>
