@@ -40,9 +40,18 @@ jobs:
           git config user.email \
             "41898282+github-actions[bot]@users.noreply.github.com"
 
+
           git add ego/
 
-          git diff --cached --quiet || \
+
+          if git diff --cached --quiet; then
+
+            echo "No changes to generated pages."
+
+          else
+
             git commit -m "Generate E.G.O pages"
 
-          git push
+            git push
+
+          fi
