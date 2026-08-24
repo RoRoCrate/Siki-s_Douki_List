@@ -1,110 +1,357 @@
-// ========================================
-// TSV読み込み
-// ========================================
+document.addEventListener(
+    "DOMContentLoaded",
+    async () => {
 
-async function loadTSV(path = "data/ego.tsv") {
+        const detail =
+            document.getElementById(
+                "detail"
+            );
 
-    const response = await fetch(
-        path,
-        {
-            cache: "no-store"
+
+        if (!detail) {
+
+            return;
+
         }
-    );
 
-    if (!response.ok) {
-        throw new Error(
-            `TSVを読み込めませんでした: ${response.status}`
-        );
+
+        // ========================================
+        // data-ego-id
+        // ========================================
+
+        let id =
+            detail.dataset.egoId;
+
+
+        // ========================================
+        // 従来の detail.html?id=ego001 にも対応
+        // ========================================
+
+        if (!id) {
+
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+
+            id =
+                params.get("id");
+
+        }
+
+
+        if (!id) {
+
+            showError(
+                "E.G.OのIDが指定されていません。"
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            const egoData =
+                await loadTSV();
+
+
+            const ego =
+                egoData.find(
+                    item =>
+                        item["ID"] === id
+                );
+
+
+            if (!ego) {
+
+                showError(
+                    `ID「${id}」のE.G.Oが見つかりません。`
+                );
+
+                return;
+
+            }
+
+
+            renderDetail(ego);
+
+
+        } catch (error) {
+
+            console.error(error);
+
+
+            showError(
+                "E.G.Oデータを読み込めませんでした。"
+            );
+
+        }
+
+    }
+);
+
+
+// ========================================
+// ランクCSS
+// ========================================
+
+function getRankClass(rank) {
+
+    const key =
+        String(rank || "")
+            .trim()
+            .toUpperCase();
+
+
+    switch (key) {
+
+        case "ZAYIN":
+            return "rank-zayin";
+
+        case "TETH":
+            return "rank-teth";
+
+        case "HE":
+            return "rank-he";
+
+        case "WAW":
+            return "rank-waw";
+
+        case "ALEPH":
+            return "rank-aleph";
+
+        default:
+            return "";
+
     }
 
-    const text = await response.text();
-
-    const normalized =
-        text
-            .replace(/^\uFEFF/, "")
-            .replace(/\r\n/g, "\n")
-            .replace(/\r/g, "\n");
-
-    const lines =
-        normalized
-            .split("\n")
-            .filter(
-                line => line.trim() !== ""
-            );
-
-    if (lines.length < 2) {
-        return [];
-    }
-
-    const headers =
-        lines[0]
-            .split("\t")
-            .map(
-                value => value.trim()
-            );
-
-    return lines
-        .slice(1)
-        .map(line => {
-
-            const values =
-                line.split("\t");
-
-            const row = {};
-
-            headers.forEach(
-                (header, index) => {
-
-                    row[header] =
-                        (values[index] ?? "")
-                            .trim()
-                            .replace(
-                                /\\n/g,
-                                "<br>"
-                            );
-
-                }
-            );
-
-            return row;
-        });
 }
 
 
 // ========================================
-// HTMLエスケープ
+// TSV文章の整形
 // ========================================
 
-function escapeHTML(value) {
+function cleanText(value) {
 
     return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+
+        .replace(
+            /^[\s\u00a0]+/,
+            ""
+        )
+
+        .replace(
+            /[\s\u00a0]+$/,
+            ""
+        )
+
+        .replace(
+            /<br\s*\/?>[\s\u00a0]+/gi,
+            "<br>"
+        )
+
+        .replace(
+            /[\s\u00a0]+<br\s*\/?>/gi,
+            "<br>"
+        )
+
+        .trim();
 
 }
 
 
 // ========================================
-// エラー表示
+// 詳細表示
 // ========================================
 
-function showError(message) {
+function renderDetail(ego) {
 
-    const element =
+    document.title =
+        `[${ego["ランク"]}] ${ego["名称"]} | E.G.O DATABASE`;
+
+
+    const detail =
         document.getElementById(
-            "errorMessage"
+            "detail"
         );
 
-    if (!element) {
-        return;
-    }
 
-    element.textContent = message;
+    const rankClass =
+        getRankClass(
+            ego["ランク"]
+        );
 
-    element.classList.remove(
-        "hidden"
-    );
+
+    detail.innerHTML = `
+
+        <article class="detail-card">
+
+
+            <header class="detail-title">
+
+                <span
+                    class="rank ${rankClass}"
+                >
+                    ${escapeHTML(
+                        ego["ランク"]
+                    )}
+                </span>
+
+
+                <h2>
+                    ${escapeHTML(
+                        ego["名称"]
+                    )}
+                </h2>
+
+
+                <p class="detail-resource">
+                    必要資源：
+                    ${escapeHTML(
+                        ego["必要資源"]
+                    )}
+                </p>
+
+            </header>
+
+
+            <!-- =========================
+                 E.G.Oパッシブ
+            ========================= -->
+
+            <section class="passive-container">
+
+
+                <div class="passive-item">
+
+                    <h3>
+                        E.G.Oパッシブ
+                    </h3>
+
+                    <p>
+                        ${cleanText(
+                            ego["E.G.Oパッシブ"]
+                        )}
+                    </p>
+
+                </div>
+
+
+                <div class="passive-item">
+
+                    <h3>
+                        発動条件
+                    </h3>
+
+                    <p>
+                        ${cleanText(
+                            ego["発動条件"]
+                        )}
+                    </p>
+
+                </div>
+
+
+                <!-- 常時効果だけ内部枠 -->
+
+                <div class="passive-always">
+
+                    <h3>
+                        常時効果
+                    </h3>
+
+                    <p>
+                        ${cleanText(
+                            ego["常時効果"]
+                        )}
+                    </p>
+
+                </div>
+
+
+                <div class="passive-item">
+
+                    <h3>
+                        効果
+                    </h3>
+
+                    <p>
+                        ${cleanText(
+                            ego["効果"]
+                        )}
+                    </p>
+
+                </div>
+
+
+            </section>
+
+
+            <!-- =========================
+                 覚醒・浸食
+            ========================= -->
+
+            <section class="two-column">
+
+
+                <div class="skill-box">
+
+                    <h3>
+                        覚醒スキル
+                    </h3>
+
+                    <p>
+                        ${cleanText(
+                            ego["覚醒スキル"]
+                        )}
+                    </p>
+
+                </div>
+
+
+                <div class="skill-box">
+
+                    <h3>
+                        浸食スキル
+                    </h3>
+
+                    <p>
+                        ${cleanText(
+                            ego["浸食スキル"]
+                        )}
+                    </p>
+
+                </div>
+
+
+            </section>
+
+
+            <!-- =========================
+                 固有
+            ========================= -->
+
+            <section class="unique-section">
+
+                <h3>
+                    固有
+                </h3>
+
+                <p>
+                    ${cleanText(
+                        ego["固有"]
+                    )}
+                </p>
+
+            </section>
+
+
+        </article>
+
+    `;
+
 }
