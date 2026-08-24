@@ -3,29 +3,31 @@ document.addEventListener(
     async () => {
 
         const detail =
-            document.getElementById(
-                "detail"
-            );
+            document.getElementById("detail");
 
 
         if (!detail) {
-
             return;
-
         }
 
 
-        // ========================================
-        // data-ego-id
-        // ========================================
+        /*
+         * 生成ページの場合
+         *
+         * data-ego-id="ego001"
+         */
 
         let id =
             detail.dataset.egoId;
 
 
-        // ========================================
-        // 従来の detail.html?id=ego001 にも対応
-        // ========================================
+        /*
+         * 従来の
+         *
+         * detail.html?id=ego001
+         *
+         * にも対応
+         */
 
         if (!id) {
 
@@ -34,9 +36,7 @@ document.addEventListener(
                     window.location.search
                 );
 
-
-            id =
-                params.get("id");
+            id = params.get("id");
 
         }
 
@@ -60,8 +60,7 @@ document.addEventListener(
 
             const ego =
                 egoData.find(
-                    item =>
-                        item["ID"] === id
+                    item => item["ID"] === id
                 );
 
 
@@ -78,8 +77,8 @@ document.addEventListener(
 
             renderDetail(ego);
 
-
-        } catch (error) {
+        }
+        catch (error) {
 
             console.error(error);
 
@@ -94,9 +93,9 @@ document.addEventListener(
 );
 
 
-// ========================================
-// ランクCSS
-// ========================================
+/*
+ * ランクのCSSクラス
+ */
 
 function getRankClass(rank) {
 
@@ -131,23 +130,38 @@ function getRankClass(rank) {
 }
 
 
-// ========================================
-// TSV文章の整形
-// ========================================
+/*
+ * TSVの文章を表示用に整える
+ *
+ * <br> はHTML改行として使用
+ */
 
 function cleanText(value) {
 
     return String(value ?? "")
+
+        /*
+         * 先頭の空白・改行を削除
+         */
 
         .replace(
             /^[\s\u00a0]+/,
             ""
         )
 
+        /*
+         * 末尾の空白・改行を削除
+         */
+
         .replace(
             /[\s\u00a0]+$/,
             ""
         )
+
+        /*
+         * <br> の前後にある
+         * 不要な空白を削除
+         */
 
         .replace(
             /<br\s*\/?>[\s\u00a0]+/gi,
@@ -164,20 +178,18 @@ function cleanText(value) {
 }
 
 
-// ========================================
-// 詳細表示
-// ========================================
+/*
+ * E.G.O詳細を表示
+ */
 
 function renderDetail(ego) {
 
     document.title =
-        `[${ego["ランク"]}] ${ego["名称"]} | E.G.O DATABASE`;
+        `${ego["名称"]} | E.G.O DATABASE`;
 
 
     const detail =
-        document.getElementById(
-            "detail"
-        );
+        document.getElementById("detail");
 
 
     const rankClass =
@@ -193,27 +205,19 @@ function renderDetail(ego) {
 
             <header class="detail-title">
 
-                <span
-                    class="rank ${rankClass}"
-                >
-                    ${escapeHTML(
-                        ego["ランク"]
-                    )}
+                <span class="rank ${rankClass}">
+                    ${escapeHTML(ego["ランク"])}
                 </span>
 
 
                 <h2>
-                    ${escapeHTML(
-                        ego["名称"]
-                    )}
+                    ${escapeHTML(ego["名称"])}
                 </h2>
 
 
                 <p class="detail-resource">
                     必要資源：
-                    ${escapeHTML(
-                        ego["必要資源"]
-                    )}
+                    ${escapeHTML(ego["必要資源"])}
                 </p>
 
             </header>
@@ -221,7 +225,7 @@ function renderDetail(ego) {
 
             <!-- =========================
                  E.G.Oパッシブ
-            ========================= -->
+            ========================== -->
 
             <section class="passive-container">
 
@@ -292,8 +296,8 @@ function renderDetail(ego) {
 
 
             <!-- =========================
-                 覚醒・浸食
-            ========================= -->
+                 覚醒・浸食スキル
+            ========================== -->
 
             <section class="two-column">
 
@@ -333,7 +337,7 @@ function renderDetail(ego) {
 
             <!-- =========================
                  固有
-            ========================= -->
+            ========================== -->
 
             <section class="unique-section">
 
