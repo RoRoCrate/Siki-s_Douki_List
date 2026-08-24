@@ -1,25 +1,40 @@
-// ========================================
-// TSV読み込み共通処理
-// ========================================
+/*
+ * TSV読み込み共通処理
+ *
+ * GitHub Pages上のどの階層から呼び出しても
+ * リポジトリ直下の data/ego.tsv を読む。
+ */
 
-async function loadTSV(path = "/Siki-s_Douki_List/data/ego.tsv") {
+async function loadTSV() {
+
+    /*
+     * GitHub Pagesのリポジトリ名
+     *
+     * https://rorocrate.github.io/Siki-s_Douki_List/
+     */
+
+    const basePath = "/Siki-s_Douki_List/";
+
+    const path = `${basePath}data/ego.tsv`;
 
     const response = await fetch(path, {
         cache: "no-store"
     });
 
     if (!response.ok) {
+
         throw new Error(
             `TSVを読み込めませんでした: ${response.status}`
         );
+
     }
 
     const text = await response.text();
 
 
-    // ========================================
-    // 改行コード・BOMを正規化
-    // ========================================
+    /*
+     * BOM・改行コードを整理
+     */
 
     const normalized =
         text
@@ -28,9 +43,9 @@ async function loadTSV(path = "/Siki-s_Douki_List/data/ego.tsv") {
             .replace(/\r/g, "\n");
 
 
-    // ========================================
-    // 行ごとに分割
-    // ========================================
+    /*
+     * 空行を除外
+     */
 
     const lines =
         normalized
@@ -43,9 +58,9 @@ async function loadTSV(path = "/Siki-s_Douki_List/data/ego.tsv") {
     }
 
 
-    // ========================================
-    // ヘッダー取得
-    // ========================================
+    /*
+     * 1行目をヘッダーとして扱う
+     */
 
     const headers =
         lines[0]
@@ -53,9 +68,9 @@ async function loadTSV(path = "/Siki-s_Douki_List/data/ego.tsv") {
             .map(value => value.trim());
 
 
-    // ========================================
-    // データ変換
-    // ========================================
+    /*
+     * 各行をオブジェクト化
+     */
 
     return lines.slice(1).map(line => {
 
@@ -63,29 +78,28 @@ async function loadTSV(path = "/Siki-s_Douki_List/data/ego.tsv") {
 
         const row = {};
 
-
         headers.forEach((header, index) => {
 
-            let value = values[index] ?? "";
+            let value =
+                values[index] ?? "";
 
 
-            // 前後の空白を削除
             value = value.trim();
 
 
             /*
              * TSV内の
              *
-             * \n
-             *
-             * を
-             *
              * <br>
              *
-             * に変換
+             * をHTML改行として利用する
              */
 
-            value = value.replace(/\\n/g, "<br>");
+            value =
+                value.replace(
+                    /\\n/g,
+                    "<br>"
+                );
 
 
             row[header] = value;
@@ -100,9 +114,9 @@ async function loadTSV(path = "/Siki-s_Douki_List/data/ego.tsv") {
 }
 
 
-// ========================================
-// HTMLエスケープ
-// ========================================
+/*
+ * HTMLエスケープ
+ */
 
 function escapeHTML(value) {
 
@@ -121,9 +135,9 @@ function escapeHTML(value) {
 }
 
 
-// ========================================
-// エラー表示
-// ========================================
+/*
+ * エラー表示
+ */
 
 function showError(message) {
 
