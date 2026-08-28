@@ -1,5 +1,4 @@
-```javascript
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", async function () {
 
     const detail = document.getElementById("detail");
 
@@ -7,17 +6,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    /*
-     * E.G.O IDを取得
-     */
-
     let id = detail.dataset.egoId;
 
     if (!id) {
-        const params = new URLSearchParams(
-            window.location.search
-        );
-
+        const params = new URLSearchParams(window.location.search);
         id = params.get("id");
     }
 
@@ -26,30 +18,30 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    /*
-     * 共有リンクかどうか
-     */
-
-    const params = new URLSearchParams(
-        window.location.search
-    );
-
-    const isShared =
-        params.get("shared") === "1";
-
+    const params = new URLSearchParams(window.location.search);
+    const isShared = params.get("shared") === "1";
 
     try {
 
         const egoData = await loadTSV();
 
-        const ego = egoData.find(
-            item => item["ID"] === id
-        );
+        let ego = null;
+
+        for (let i = 0; i < egoData.length; i++) {
+
+            if (String(egoData[i].ID).trim() === String(id).trim()) {
+                ego = egoData[i];
+                break;
+            }
+
+        }
 
         if (!ego) {
+
             showError(
-                `ID「${id}」のE.G.Oが見つかりません。`
+                "ID「" + id + "」のE.G.Oが見つかりません。"
             );
+
             return;
         }
 
@@ -69,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 /* =========================
-   ランク判定
+   ランク
 ========================= */
 
 function getRankClass(rank) {
@@ -98,32 +90,28 @@ function getRankClass(rank) {
         default:
             return "";
     }
+
 }
 
 
 /* =========================
-   TSV文章整形
+   文章整形
 ========================= */
 
 function cleanText(value) {
 
-    return String(value ?? "")
+    return String(value || "")
         .replace(/^[\s\u00a0]+/, "")
         .replace(/[\s\u00a0]+$/, "")
-        .replace(
-            /<br\s*\/?>[\s\u00a0]+/gi,
-            "<br>"
-        )
-        .replace(
-            /[\s\u00a0]+<br\s*\/?>/gi,
-            "<br>"
-        )
+        .replace(/<br\s*\/?>[\s\u00a0]+/gi, "<br>")
+        .replace(/[\s\u00a0]+<br\s*\/?>/gi, "<br>")
         .trim();
+
 }
 
 
 /* =========================
-   共有リンクをコピー
+   共有
 ========================= */
 
 async function shareEGO(ego) {
@@ -137,62 +125,34 @@ async function shareEGO(ego) {
 
         await navigator.clipboard.writeText(url);
 
-        alert(
-            "共有用リンクをコピーしました。"
-        );
+        alert("共有用リンクをコピーしました。");
 
     } catch (error) {
 
-        console.error(
-            "クリップボードへのコピーに失敗しました。",
-            error
-        );
+        console.error(error);
 
-        /*
-         * Clipboard APIが使えない場合
-         */
+        const textarea =
+            document.createElement("textarea");
+
+        textarea.value = url;
+
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+
+        document.body.appendChild(textarea);
+
+        textarea.focus();
+        textarea.select();
 
         try {
 
-            const textarea =
-                document.createElement("textarea");
+            document.execCommand("copy");
 
-            textarea.value = url;
+            alert("共有用リンクをコピーしました。");
 
-            textarea.style.position = "fixed";
-            textarea.style.left = "-9999px";
+        } catch (copyError) {
 
-            document.body.appendChild(textarea);
-
-            textarea.focus();
-            textarea.select();
-
-            const success =
-                document.execCommand("copy");
-
-            textarea.remove();
-
-            if (success) {
-
-                alert(
-                    "共有用リンクをコピーしました。"
-                );
-
-            } else {
-
-                alert(
-                    "リンクのコピーに失敗しました。\n\n" +
-                    url
-                );
-
-            }
-
-        } catch (fallbackError) {
-
-            console.error(
-                "コピーに失敗しました。",
-                fallbackError
-            );
+            console.error(copyError);
 
             alert(
                 "リンクのコピーに失敗しました。\n\n" +
@@ -200,6 +160,8 @@ async function shareEGO(ego) {
             );
 
         }
+
+        textarea.remove();
 
     }
 
@@ -210,11 +172,7 @@ async function shareEGO(ego) {
    詳細表示
 ========================= */
 
-function renderDetail(ego, isShared = false) {
-
-    /*
-     * ページタイトル
-     */
+function renderDetail(ego, isShared) {
 
     document.title =
         "[" +
@@ -227,21 +185,21 @@ function renderDetail(ego, isShared = false) {
     const detail =
         document.getElementById("detail");
 
+
     const rankClass =
         getRankClass(ego["ランク"]);
 
 
-    /*
-     * 共有ボタン
-     *
-     * shared=1の場合は作らない
-     */
+    let shareButton = "";
 
-    let shareButtonHTML = "";
+
+    /*
+     * 通常ページだけ共有ボタンを表示
+     */
 
     if (!isShared) {
 
-        shareButtonHTML = `
+        shareButton = `
             <button
                 type="button"
                 class="share-button"
@@ -277,114 +235,70 @@ function renderDetail(ego, isShared = false) {
                 </p>
 
 
-                ${shareButtonHTML}
+                ${shareButton}
 
             </header>
 
-
-            <!-- =====================
-                 E.G.Oパッシブ
-            ====================== -->
 
             <section class="passive-container">
 
 
                 <div class="passive-item">
 
-                    <h3>
-                        E.G.Oパッシブ
-                    </h3>
+                    <h3>E.G.Oパッシブ</h3>
 
-                    <p>
-                        ${cleanText(
-                            ego["E.G.Oパッシブ"]
-                        )}
-                    </p>
+                    <p>${cleanText(ego["E.G.Oパッシブ"])}</p>
 
                 </div>
 
 
                 <div class="passive-item">
 
-                    <h3>
-                        発動条件
-                    </h3>
+                    <h3>発動条件</h3>
 
-                    <p>
-                        ${cleanText(
-                            ego["発動条件"]
-                        )}
-                    </p>
+                    <p>${cleanText(ego["発動条件"])}</p>
 
                 </div>
 
 
                 <div class="passive-always">
 
-                    <h3>
-                        常時効果
-                    </h3>
+                    <h3>常時効果</h3>
 
-                    <p>
-                        ${cleanText(
-                            ego["常時効果"]
-                        )}
-                    </p>
+                    <p>${cleanText(ego["常時効果"])}</p>
 
                 </div>
 
 
                 <div class="passive-item">
 
-                    <h3>
-                        効果
-                    </h3>
+                    <h3>効果</h3>
 
-                    <p>
-                        ${cleanText(
-                            ego["効果"]
-                        )}
-                    </p>
+                    <p>${cleanText(ego["効果"])}</p>
 
                 </div>
 
 
             </section>
 
-
-            <!-- =====================
-                 覚醒・浸食スキル
-            ====================== -->
 
             <section class="two-column">
 
 
                 <div class="skill-box">
 
-                    <h3>
-                        覚醒スキル
-                    </h3>
+                    <h3>覚醒スキル</h3>
 
-                    <p>
-                        ${cleanText(
-                            ego["覚醒スキル"]
-                        )}
-                    </p>
+                    <p>${cleanText(ego["覚醒スキル"])}</p>
 
                 </div>
 
 
                 <div class="skill-box">
 
-                    <h3>
-                        浸食スキル
-                    </h3>
+                    <h3>浸食スキル</h3>
 
-                    <p>
-                        ${cleanText(
-                            ego["浸食スキル"]
-                        )}
-                    </p>
+                    <p>${cleanText(ego["浸食スキル"])}</p>
 
                 </div>
 
@@ -392,21 +306,11 @@ function renderDetail(ego, isShared = false) {
             </section>
 
 
-            <!-- =====================
-                 固有
-            ====================== -->
-
             <section class="unique-section">
 
-                <h3>
-                    固有
-                </h3>
+                <h3>固有</h3>
 
-                <p>
-                    ${cleanText(
-                        ego["固有"]
-                    )}
-                </p>
+                <p>${cleanText(ego["固有"])}</p>
 
             </section>
 
@@ -417,21 +321,21 @@ function renderDetail(ego, isShared = false) {
 
 
     /*
-     * 通常ページのみ共有ボタンを設定
+     * 通常ページだけ共有ボタンを設定
      */
 
     if (!isShared) {
 
-        const shareButton =
-            document.getElementById(
-                "shareButton"
-            );
+        const button =
+            document.getElementById("shareButton");
 
-        if (shareButton) {
+        if (button) {
 
-            shareButton.addEventListener(
+            button.addEventListener(
                 "click",
-                () => shareEGO(ego)
+                function () {
+                    shareEGO(ego);
+                }
             );
 
         }
@@ -440,16 +344,13 @@ function renderDetail(ego, isShared = false) {
 
 
     /*
-     * 共有リンクの場合、
-     * 一覧へ戻るリンクを削除
+     * 共有ページでは一覧リンクを消す
      */
 
     if (isShared) {
 
         const backLink =
-            document.querySelector(
-                ".back-link"
-            );
+            document.querySelector(".back-link");
 
         if (backLink) {
             backLink.remove();
@@ -458,4 +359,3 @@ function renderDetail(ego, isShared = false) {
     }
 
 }
-```
