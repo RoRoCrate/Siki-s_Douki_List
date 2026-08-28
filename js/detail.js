@@ -119,21 +119,7 @@ async function shareEGO(ego) {
         window.location.pathname +
         "?shared=1";
 
-    const title =
-        `[${ego["ランク"]}]${ego["名称"]}`;
-
     try {
-
-        if (navigator.share) {
-
-            await navigator.share({
-                title: title,
-                text: title,
-                url: url
-            });
-
-            return;
-        }
 
         await navigator.clipboard.writeText(url);
 
@@ -141,11 +127,45 @@ async function shareEGO(ego) {
 
     } catch (error) {
 
-        if (error.name !== "AbortError") {
+        console.error(
+            "リンクのコピーに失敗しました。",
+            error
+        );
+
+        /*
+         * clipboard APIが使えない場合の予備処理
+         */
+        try {
+
+            const textarea =
+                document.createElement("textarea");
+
+            textarea.value = url;
+
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+
+            document.body.appendChild(textarea);
+
+            textarea.focus();
+            textarea.select();
+
+            document.execCommand("copy");
+
+            textarea.remove();
+
+            alert("共有用リンクをコピーしました。");
+
+        } catch (fallbackError) {
 
             console.error(
-                "共有に失敗しました。",
-                error
+                "コピーに失敗しました。",
+                fallbackError
+            );
+
+            alert(
+                "リンクのコピーに失敗しました。\n\n" +
+                url
             );
 
         }
@@ -153,164 +173,6 @@ async function shareEGO(ego) {
     }
 
 }
-
-
-function renderDetail(ego, isShared = false) {
-
-    document.title =
-        `[${ego["ランク"]}]${ego["名称"]} | E.G.O DATABASE`;
-
-    const detail =
-        document.getElementById("detail");
-
-    const rankClass =
-        getRankClass(ego["ランク"]);
-
-
-    detail.innerHTML = `
-
-        <article class="detail-card">
-
-            <header class="detail-title">
-
-                <span class="rank ${rankClass}">
-                    ${escapeHTML(ego["ランク"])}
-                </span>
-
-                <h2>
-                    ${escapeHTML(ego["名称"])}
-                </h2>
-
-                <p class="detail-resource">
-                    必要資源：
-                    ${escapeHTML(ego["必要資源"])}
-                </p>
-
-                <button
-                    type="button"
-                    class="share-button"
-                    id="shareButton"
-                >
-                    ↗ 共有
-                </button>
-
-            </header>
-
-
-            <section class="passive-container">
-
-                <div class="passive-item">
-
-                    <h3>E.G.Oパッシブ</h3>
-
-                    <p>
-                        ${cleanText(
-                            ego["E.G.Oパッシブ"]
-                        )}
-                    </p>
-
-                </div>
-
-
-                <div class="passive-item">
-
-                    <h3>発動条件</h3>
-
-                    <p>
-                        ${cleanText(
-                            ego["発動条件"]
-                        )}
-                    </p>
-
-                </div>
-
-
-                <div class="passive-always">
-
-                    <h3>常時効果</h3>
-
-                    <p>
-                        ${cleanText(
-                            ego["常時効果"]
-                        )}
-                    </p>
-
-                </div>
-
-
-                <div class="passive-item">
-
-                    <h3>効果</h3>
-
-                    <p>
-                        ${cleanText(
-                            ego["効果"]
-                        )}
-                    </p>
-
-                </div>
-
-            </section>
-
-
-            <section class="two-column">
-
-                <div class="skill-box">
-
-                    <h3>覚醒スキル</h3>
-
-                    <p>
-                        ${cleanText(
-                            ego["覚醒スキル"]
-                        )}
-                    </p>
-
-                </div>
-
-
-                <div class="skill-box">
-
-                    <h3>浸食スキル</h3>
-
-                    <p>
-                        ${cleanText(
-                            ego["浸食スキル"]
-                        )}
-                    </p>
-
-                </div>
-
-            </section>
-
-
-            <section class="unique-section">
-
-                <h3>固有</h3>
-
-                <p>
-                    ${cleanText(
-                        ego["固有"]
-                    )}
-                </p>
-
-            </section>
-
-        </article>
-
-    `;
-
-
-    const shareButton =
-        document.getElementById("shareButton");
-
-    if (shareButton) {
-
-        shareButton.addEventListener(
-            "click",
-            () => shareEGO(ego)
-        );
-
-    }
 
 
     /*
