@@ -7,47 +7,32 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-
     /*
      * E.G.O IDを取得
-     *
-     * 個別生成ページ：
-     * <div id="detail" data-ego-id="ego001">
-     *
-     * 従来のURL：
-     * detail.html?id=ego001
      */
 
     let id = detail.dataset.egoId;
 
     if (!id) {
-
-        const params =
-            new URLSearchParams(window.location.search);
-
-        id = params.get("id");
-
-    }
-
-
-    if (!id) {
-
-        showError(
-            "E.G.OのIDが指定されていません。"
+        const params = new URLSearchParams(
+            window.location.search
         );
 
+        id = params.get("id");
+    }
+
+    if (!id) {
+        showError("E.G.OのIDが指定されていません。");
         return;
     }
 
-
     /*
      * 共有リンクかどうか
-     *
-     * ?shared=1
      */
 
-    const params =
-        new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(
+        window.location.search
+    );
 
     const isShared =
         params.get("shared") === "1";
@@ -55,28 +40,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
 
-        const egoData =
-            await loadTSV();
+        const egoData = await loadTSV();
 
-
-        const ego =
-            egoData.find(
-                item => item["ID"] === id
-            );
-
+        const ego = egoData.find(
+            item => item["ID"] === id
+        );
 
         if (!ego) {
-
             showError(
                 `ID「${id}」のE.G.Oが見つかりません。`
             );
-
             return;
         }
 
-
         renderDetail(ego, isShared);
-
 
     } catch (error) {
 
@@ -91,18 +68,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 
-
-/*
- * ランクごとのCSSクラス
- */
+/* =========================
+   ランク判定
+========================= */
 
 function getRankClass(rank) {
 
-    const key =
-        String(rank || "")
-            .trim()
-            .toUpperCase();
-
+    const key = String(rank || "")
+        .trim()
+        .toUpperCase();
 
     switch (key) {
 
@@ -123,86 +97,49 @@ function getRankClass(rank) {
 
         default:
             return "";
-
     }
-
 }
 
 
-
-/*
- * TSVの文章を表示用に整える
- *
- * <br> はHTMLの改行として使用。
- *
- * 文章の先頭・末尾にある
- * 改行や空白を削除。
- */
+/* =========================
+   TSV文章整形
+========================= */
 
 function cleanText(value) {
 
     return String(value ?? "")
-
-        .replace(
-            /^[\s\u00a0]+/,
-            ""
-        )
-
-        .replace(
-            /[\s\u00a0]+$/,
-            ""
-        )
-
+        .replace(/^[\s\u00a0]+/, "")
+        .replace(/[\s\u00a0]+$/, "")
         .replace(
             /<br\s*\/?>[\s\u00a0]+/gi,
             "<br>"
         )
-
         .replace(
             /[\s\u00a0]+<br\s*\/?>/gi,
             "<br>"
         )
-
         .trim();
-
 }
 
 
-
-/*
- * 共有用リンクをクリップボードへコピー
- */
+/* =========================
+   共有リンクをコピー
+========================= */
 
 async function shareEGO(ego) {
-
-    /*
-     * 現在のページURLを取得
-     *
-     * 例：
-     * https://rorocrate.github.io/
-     * Siki-s_Douki_List/
-     * ego/ego001/
-     */
 
     const url =
         window.location.origin +
         window.location.pathname +
         "?shared=1";
 
-
     try {
 
-        /*
-         * クリップボードへコピー
-         */
-
         await navigator.clipboard.writeText(url);
-
 
         alert(
             "共有用リンクをコピーしました。"
         );
-
 
     } catch (error) {
 
@@ -211,10 +148,8 @@ async function shareEGO(ego) {
             error
         );
 
-
         /*
-         * clipboard APIが使用できない環境向け
-         * フォールバック処理
+         * Clipboard APIが使えない場合
          */
 
         try {
@@ -222,32 +157,20 @@ async function shareEGO(ego) {
             const textarea =
                 document.createElement("textarea");
 
-
             textarea.value = url;
 
+            textarea.style.position = "fixed";
+            textarea.style.left = "-9999px";
 
-            textarea.style.position =
-                "fixed";
-
-            textarea.style.left =
-                "-9999px";
-
-
-            document.body.appendChild(
-                textarea
-            );
-
+            document.body.appendChild(textarea);
 
             textarea.focus();
             textarea.select();
 
-
             const success =
                 document.execCommand("copy");
 
-
             textarea.remove();
-
 
             if (success) {
 
@@ -264,14 +187,12 @@ async function shareEGO(ego) {
 
             }
 
-
         } catch (fallbackError) {
 
             console.error(
                 "コピーに失敗しました。",
                 fallbackError
             );
-
 
             alert(
                 "リンクのコピーに失敗しました。\n\n" +
@@ -285,10 +206,9 @@ async function shareEGO(ego) {
 }
 
 
-
-/*
- * E.G.O詳細ページを表示
- */
+/* =========================
+   詳細表示
+========================= */
 
 function renderDetail(ego, isShared = false) {
 
@@ -297,39 +217,41 @@ function renderDetail(ego, isShared = false) {
      */
 
     document.title =
-        `[${ego["ランク"]}]${ego["名称"]} | E.G.O DATABASE`;
+        "[" +
+        ego["ランク"] +
+        "]" +
+        ego["名称"] +
+        " | E.G.O DATABASE";
 
 
     const detail =
         document.getElementById("detail");
 
-
     const rankClass =
         getRankClass(ego["ランク"]);
-
 
 
     /*
      * 共有ボタン
      *
-     * 通常ページだけ表示する。
-     *
-     * shared=1 の場合は表示しない。
+     * shared=1の場合は作らない
      */
 
-    const shareButtonHTML =
-        isShared
-            ? ""
-            : `
-                <button
-                    type="button"
-                    class="share-button"
-                    id="shareButton"
-                >
-                    ↗ 共有
-                </button>
-            `;
+    let shareButtonHTML = "";
 
+    if (!isShared) {
+
+        shareButtonHTML = `
+            <button
+                type="button"
+                class="share-button"
+                id="shareButton"
+            >
+                ↗ 共有
+            </button>
+        `;
+
+    }
 
 
     detail.innerHTML = `
@@ -337,12 +259,7 @@ function renderDetail(ego, isShared = false) {
         <article class="detail-card">
 
 
-            <!-- =========================
-                 タイトル
-            ========================= -->
-
             <header class="detail-title">
-
 
                 <span class="rank ${rankClass}">
                     ${escapeHTML(ego["ランク"])}
@@ -362,14 +279,12 @@ function renderDetail(ego, isShared = false) {
 
                 ${shareButtonHTML}
 
-
             </header>
 
 
-
-            <!-- =========================
+            <!-- =====================
                  E.G.Oパッシブ
-            ========================= -->
+            ====================== -->
 
             <section class="passive-container">
 
@@ -389,7 +304,6 @@ function renderDetail(ego, isShared = false) {
                 </div>
 
 
-
                 <div class="passive-item">
 
                     <h3>
@@ -405,9 +319,6 @@ function renderDetail(ego, isShared = false) {
                 </div>
 
 
-
-                <!-- 常時効果だけ内部枠 -->
-
                 <div class="passive-always">
 
                     <h3>
@@ -421,7 +332,6 @@ function renderDetail(ego, isShared = false) {
                     </p>
 
                 </div>
-
 
 
                 <div class="passive-item">
@@ -442,10 +352,9 @@ function renderDetail(ego, isShared = false) {
             </section>
 
 
-
-            <!-- =========================
+            <!-- =====================
                  覚醒・浸食スキル
-            ========================= -->
+            ====================== -->
 
             <section class="two-column">
 
@@ -463,7 +372,6 @@ function renderDetail(ego, isShared = false) {
                     </p>
 
                 </div>
-
 
 
                 <div class="skill-box">
@@ -484,10 +392,9 @@ function renderDetail(ego, isShared = false) {
             </section>
 
 
-
-            <!-- =========================
+            <!-- =====================
                  固有
-            ========================= -->
+            ====================== -->
 
             <section class="unique-section">
 
@@ -509,10 +416,8 @@ function renderDetail(ego, isShared = false) {
     `;
 
 
-
     /*
-     * 通常ページの場合だけ
-     * 共有ボタンに処理を設定
+     * 通常ページのみ共有ボタンを設定
      */
 
     if (!isShared) {
@@ -521,7 +426,6 @@ function renderDetail(ego, isShared = false) {
             document.getElementById(
                 "shareButton"
             );
-
 
         if (shareButton) {
 
@@ -535,11 +439,9 @@ function renderDetail(ego, isShared = false) {
     }
 
 
-
     /*
-     * 共有リンクの場合
-     *
-     * 「E.G.O一覧へ戻る」を削除
+     * 共有リンクの場合、
+     * 一覧へ戻るリンクを削除
      */
 
     if (isShared) {
@@ -549,11 +451,8 @@ function renderDetail(ego, isShared = false) {
                 ".back-link"
             );
 
-
         if (backLink) {
-
             backLink.remove();
-
         }
 
     }
