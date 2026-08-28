@@ -1,4 +1,5 @@
 E.G.O DATABASE
+https://rorocrate.github.io/Siki-s_Douki_List/
 
 ■ ファイル構成
 index.html       E.G.O一覧・検索
