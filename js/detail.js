@@ -1,100 +1,63 @@
-document.addEventListener(
-    "DOMContentLoaded",
-    async () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
-        const detail =
-            document.getElementById("detail");
+    const detail = document.getElementById("detail");
 
+    if (!detail) {
+        return;
+    }
 
-        if (!detail) {
-            return;
-        }
+    let id = detail.dataset.egoId;
 
+    if (!id) {
+        const params =
+            new URLSearchParams(window.location.search);
 
-        /*
-         * 生成ページの場合
-         *
-         * data-ego-id="ego001"
-         */
+        id = params.get("id");
+    }
 
-        let id =
-            detail.dataset.egoId;
+    if (!id) {
+        showError("E.G.OのIDが指定されていません。");
+        return;
+    }
 
+    const params =
+        new URLSearchParams(window.location.search);
 
-        /*
-         * 従来の
-         *
-         * detail.html?id=ego001
-         *
-         * にも対応
-         */
+    const isShared =
+        params.get("shared") === "1";
 
-        if (!id) {
+    try {
 
-            const params =
-                new URLSearchParams(
-                    window.location.search
-                );
+        const egoData = await loadTSV();
 
-            id = params.get("id");
+        const ego =
+            egoData.find(
+                item => item["ID"] === id
+            );
 
-        }
-
-
-        if (!id) {
+        if (!ego) {
 
             showError(
-                "E.G.OのIDが指定されていません。"
+                `ID「${id}」のE.G.Oが見つかりません。`
             );
 
             return;
-
         }
 
+        renderDetail(ego, isShared);
 
-       try {
+    } catch (error) {
 
-            const egoData =
-                await loadTSV("../../data/ego.tsv");
+        console.error(error);
 
-            const ego =
-                egoData.find(
-                    item => item["ID"] === id
-                );
-
-
-            if (!ego) {
-
-                showError(
-                    `ID「${id}」のE.G.Oが見つかりません。`
-                );
-
-                return;
-
-            }
-
-
-            renderDetail(ego);
-
-        }
-        catch (error) {
-
-            console.error(error);
-
-
-            showError(
-                "E.G.Oデータを読み込めませんでした。"
-            );
-
-        }
+        showError(
+            "E.G.Oデータを読み込めませんでした。"
+        );
 
     }
-);
 
+});
 
-/*
- * ランクのCSSクラス
- */
 
 function getRankClass(rank) {
 
@@ -102,7 +65,6 @@ function getRankClass(rank) {
         String(rank || "")
             .trim()
             .toUpperCase();
-
 
     switch (key) {
 
@@ -125,42 +87,15 @@ function getRankClass(rank) {
             return "";
 
     }
-
 }
 
-
-/*
- * TSVの文章を表示用に整える
- *
- * <br> はHTML改行として使用
- */
 
 function cleanText(value) {
 
     return String(value ?? "")
 
-        /*
-         * 先頭の空白・改行を削除
-         */
-
-        .replace(
-            /^[\s\u00a0]+/,
-            ""
-        )
-
-        /*
-         * 末尾の空白・改行を削除
-         */
-
-        .replace(
-            /[\s\u00a0]+$/,
-            ""
-        )
-
-        /*
-         * <br> の前後にある
-         * 不要な空白を削除
-         */
+        .replace(/^[\s\u00a0]+/, "")
+        .replace(/[\s\u00a0]+$/, "")
 
         .replace(
             /<br\s*\/?>[\s\u00a0]+/gi,
@@ -177,30 +112,64 @@ function cleanText(value) {
 }
 
 
-/*
- * E.G.O詳細を表示
- */
+async function shareEGO(ego) {
 
-function renderDetail(ego) {
+    const url =
+        window.location.origin +
+        window.location.pathname +
+        "?shared=1";
+
+    const title =
+        `[${ego["ランク"]}]${ego["名称"]}`;
+
+    try {
+
+        if (navigator.share) {
+
+            await navigator.share({
+                title: title,
+                text: title,
+                url: url
+            });
+
+            return;
+        }
+
+        await navigator.clipboard.writeText(url);
+
+        alert("共有用リンクをコピーしました。");
+
+    } catch (error) {
+
+        if (error.name !== "AbortError") {
+
+            console.error(
+                "共有に失敗しました。",
+                error
+            );
+
+        }
+
+    }
+
+}
+
+
+function renderDetail(ego, isShared = false) {
 
     document.title =
-        `${ego["名称"]} | E.G.O DATABASE`;
-
+        `[${ego["ランク"]}]${ego["名称"]} | E.G.O DATABASE`;
 
     const detail =
         document.getElementById("detail");
 
-
     const rankClass =
-        getRankClass(
-            ego["ランク"]
-        );
+        getRankClass(ego["ランク"]);
 
 
     detail.innerHTML = `
 
         <article class="detail-card">
-
 
             <header class="detail-title">
 
@@ -208,32 +177,31 @@ function renderDetail(ego) {
                     ${escapeHTML(ego["ランク"])}
                 </span>
 
-
                 <h2>
                     ${escapeHTML(ego["名称"])}
                 </h2>
-
 
                 <p class="detail-resource">
                     必要資源：
                     ${escapeHTML(ego["必要資源"])}
                 </p>
 
+                <button
+                    type="button"
+                    class="share-button"
+                    id="shareButton"
+                >
+                    ↗ 共有
+                </button>
+
             </header>
 
 
-            <!-- =========================
-                 E.G.Oパッシブ
-            ========================== -->
-
             <section class="passive-container">
-
 
                 <div class="passive-item">
 
-                    <h3>
-                        E.G.Oパッシブ
-                    </h3>
+                    <h3>E.G.Oパッシブ</h3>
 
                     <p>
                         ${cleanText(
@@ -246,9 +214,7 @@ function renderDetail(ego) {
 
                 <div class="passive-item">
 
-                    <h3>
-                        発動条件
-                    </h3>
+                    <h3>発動条件</h3>
 
                     <p>
                         ${cleanText(
@@ -259,13 +225,9 @@ function renderDetail(ego) {
                 </div>
 
 
-                <!-- 常時効果だけ内部枠 -->
-
                 <div class="passive-always">
 
-                    <h3>
-                        常時効果
-                    </h3>
+                    <h3>常時効果</h3>
 
                     <p>
                         ${cleanText(
@@ -278,9 +240,7 @@ function renderDetail(ego) {
 
                 <div class="passive-item">
 
-                    <h3>
-                        効果
-                    </h3>
+                    <h3>効果</h3>
 
                     <p>
                         ${cleanText(
@@ -290,22 +250,14 @@ function renderDetail(ego) {
 
                 </div>
 
-
             </section>
 
 
-            <!-- =========================
-                 覚醒・浸食スキル
-            ========================== -->
-
             <section class="two-column">
-
 
                 <div class="skill-box">
 
-                    <h3>
-                        覚醒スキル
-                    </h3>
+                    <h3>覚醒スキル</h3>
 
                     <p>
                         ${cleanText(
@@ -318,9 +270,7 @@ function renderDetail(ego) {
 
                 <div class="skill-box">
 
-                    <h3>
-                        浸食スキル
-                    </h3>
+                    <h3>浸食スキル</h3>
 
                     <p>
                         ${cleanText(
@@ -330,19 +280,12 @@ function renderDetail(ego) {
 
                 </div>
 
-
             </section>
 
 
-            <!-- =========================
-                 固有
-            ========================== -->
-
             <section class="unique-section">
 
-                <h3>
-                    固有
-                </h3>
+                <h3>固有</h3>
 
                 <p>
                     ${cleanText(
@@ -352,9 +295,38 @@ function renderDetail(ego) {
 
             </section>
 
-
         </article>
 
     `;
+
+
+    const shareButton =
+        document.getElementById("shareButton");
+
+    if (shareButton) {
+
+        shareButton.addEventListener(
+            "click",
+            () => shareEGO(ego)
+        );
+
+    }
+
+
+    /*
+     * 共有リンクの場合は
+     * 「一覧へ戻る」を消す
+     */
+
+    if (isShared) {
+
+        const backLink =
+            document.querySelector(".back-link");
+
+        if (backLink) {
+            backLink.remove();
+        }
+
+    }
 
 }
